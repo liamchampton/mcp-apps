@@ -82,6 +82,45 @@ Then use the generated URL in your MCP config:
 
 This is useful for sharing apps with others or accessing from different machines.
 
+### Remote (Azure Dev Tunnels)
+
+Expose your local server using [Azure Dev Tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started?tabs=macos):
+
+```bash
+# Install dev tunnel CLI (macOS)
+brew install --cask microsoft-developer-tunnel
+
+# Or on Windows using winget
+winget install Microsoft.devtunnel
+
+# Login (use Microsoft or GitHub account)
+devtunnel user login
+
+# Start your app
+npm start
+
+# In another terminal, create a tunnel
+devtunnel host -p <port>
+
+# For public access (optional)
+devtunnel host -p <port> --allow-anonymous
+```
+
+You'll receive a public URL like `https://<tunnel-id>.<region>.devtunnels.ms`. Use it in your MCP config:
+
+```json
+{
+  "servers": {
+    "<app-name>": {
+      "type": "http",
+      "url": "https://<tunnel-id>.<region>.devtunnels.ms/mcp"
+    }
+  }
+}
+```
+
+See the [Azure Dev Tunnels documentation](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started?tabs=macos) for more options.
+
 ### Deploy to Azure
 
 Deploy your MCP app to [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/) for a fully hosted solution:
