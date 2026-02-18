@@ -12,50 +12,124 @@ Host calls tool → Server returns result → Host renders resource UI → UI re
 
 ## Example Apps
 
-| App | Description |
-|-----|-------------|
-| [Colour Picker](colour-picker-mcp/) | Interactive colour picker with hex/RGB/HSL support |
-| [Weather App](mcp-weather-app/) | Weather forecasts using Open-Meteo API |
+| App | Description | Default Port |
+|-----|-------------|:------------:|
+| [Colour Picker](colour-picker-mcp/) | Interactive colour picker with hex/RGB/HSL support | 3001 |
+| [Weather App](mcp-weather-app/) | Weather forecasts using Open-Meteo API | 3002 |
+| [Flight Status](flight-status-mcp/) | Real-time flight status lookup | 3003 |
+| [Flamegraph Profiler](flamegraph-profiler-mcp/) | Go application CPU/memory profiling with interactive flamegraphs | 3003 |
 
 Each app has its own README with detailed documentation.
 
-## Quick start for each App
+## Prerequisites
 
-Each app in this repo follows the same pattern:
+- **[Node.js](https://nodejs.org/) v18 or later** (includes `npm`)
+- **[Go](https://go.dev/) 1.19+** — only required for the Flamegraph Profiler app
+- **[Git](https://git-scm.com/)** — to clone the repository
+
+Verify your setup:
 
 ```bash
-# Navigate to any app directory
-cd <app-name>
+node -v   # should print v18.x or higher
+npm -v    # should print 9.x or higher
+git --version
+```
+
+## Local Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/liamchampton/mcp-apps.git
+cd mcp-apps
+```
+
+### 2. Install, build, and run an app
+
+Each app in this repo follows the same pattern. Pick one (or more) and run:
+
+```bash
+# Navigate to the app directory
+cd colour-picker-mcp   # or mcp-weather-app, flight-status-mcp, flamegraph-profiler-mcp
 
 # Install dependencies
 npm install
 
-# Build and run
+# Build and start the server
 npm start
 ```
 
-The server will start and display its URL.
+The terminal will confirm the server is running and print the local URL (e.g. `http://localhost:3001/mcp`).
 
-## Connecting to Apps
+> **Tip:** To run multiple apps at the same time, open a separate terminal for each one. The Flight Status and Flamegraph Profiler apps both default to port 3003, so set a custom port for one of them if you need both running simultaneously:
+> ```bash
+> PORT=3004 npm start
+> ```
 
-Apps can be accessed locally or remotely:
+### 3. Connect the MCP server to your host
 
-### Local (localhost)
+#### VS Code / GitHub Copilot
 
-Run the app locally and connect via `localhost`:
+Add the server to your workspace MCP configuration. Create or edit `.vscode/mcp.json` in your project:
 
 ```json
 {
   "servers": {
-    "<app-name>": {
+    "colour-picker-mcp": {
       "type": "http",
-      "url": "http://localhost:<port>/mcp"
+      "url": "http://localhost:3001/mcp"
+    },
+    "weather-mcp": {
+      "type": "http",
+      "url": "http://localhost:3002/mcp"
+    },
+    "flight-status": {
+      "type": "http",
+      "url": "http://localhost:3003/mcp"
+    },
+    "flamegraph-mcp": {
+      "type": "http",
+      "url": "http://localhost:3003/mcp"
     }
   }
 }
 ```
 
-### Remote (Cloudflare Tunnel)
+Then open Copilot Chat in **Agent mode** and the tools will be available automatically.
+
+#### Claude Desktop
+
+Add the server to your Claude Desktop config file:
+
+- **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "colour-picker-mcp": {
+      "url": "http://localhost:3001/mcp"
+    }
+  }
+}
+```
+
+Restart Claude Desktop after saving the config.
+
+### 4. Use the tools
+
+Once connected, ask your AI host to use the tool. For example:
+
+- *"Pick a colour"* → triggers the `pick-colour` tool
+- *"What's the weather in London?"* → triggers the `get-weather` tool
+- *"Check the status of flight BA123"* → triggers the `get-flight-status` tool
+- *"Profile the app at ./sample-app/main.go"* → triggers the `profile-app` tool
+
+## Connecting Remotely
+
+Apps can also be exposed over the internet:
+
+### Cloudflare Tunnel
 
 Expose your local server to the internet using [Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/):
 
@@ -82,7 +156,7 @@ Then use the generated URL in your MCP config:
 
 This is useful for sharing apps with others or accessing from different machines.
 
-### Remote (Azure Dev Tunnels)
+### Azure Dev Tunnels
 
 Expose your local server using [Azure Dev Tunnels](https://learn.microsoft.com/en-us/azure/developer/dev-tunnels/get-started?tabs=macos):
 
